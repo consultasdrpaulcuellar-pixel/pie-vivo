@@ -198,7 +198,7 @@
     return (pacientes.length > 1 ? '<p><a href="#pacientes">← Pacientes</a></p>' : '') + '<h1>' + escapar(p.nombre) + '</h1><p class="suave">Datos de prueba · frecuencia indicada: cada ' +
       C.frecuencia.diasEntreControles + ' día(s)</p>' +
       '<div class="dos-columnas">' +
-      '<section class="tarjeta"><h3 style="margin-top:0">Línea basal · ' + D.fechaCorta(p.basal.fecha) + '</h3><dl>' + basal + '</dl></section>' +
+      '<section class="tarjeta"><h3 style="margin-top:0">Registro inicial (línea basal) · ' + D.fechaCorta(p.basal.fecha) + '</h3><dl>' + basal + '</dl></section>' +
       '<section class="tarjeta"><h3 style="margin-top:0">Uso</h3><dl>' +
       '<dt>Controles enviados</dt><dd>' + reales.length + '</dd>' +
       '<dt>Hechos con ayuda</dt><dd>' + conAyuda + '</dd>' +
@@ -311,7 +311,7 @@
       '<section class="tarjeta"><h2 style="margin-top:0">3. Fotografías</h2>' +
       C.fotos.map(function (f, i) { return '<div class="contenido-item"><div class="texto">' + (i + 1) + '. ' + escapar(f.titulo) + '</div><div class="suave">Guía: ' + escapar(f.guia) + '</div></div>'; }).join('') + '</section>' +
 
-      '<section class="tarjeta"><h2 style="margin-top:0">4. Línea basal</h2><p class="suave">' + escapar(C.basal.intro) + '</p>' + bloquePreguntas(C.basal.preguntas, false) + '</section>' +
+      '<section class="tarjeta"><h2 style="margin-top:0">4. Registro inicial (línea basal)</h2><p class="suave">' + escapar(C.basal.intro) + '</p>' + bloquePreguntas(C.basal.preguntas, false) + '</section>' +
 
       '<section class="tarjeta"><h2 style="margin-top:0">5. Señales de alarma y contacto</h2><p><strong>' + escapar(C.ayuda.alarmaTitulo) + '</strong></p>' +
       lista(C.ayuda.senales) + '<p>' + escapar(C.ayuda.alarmaAccion) + '</p>' + lista(contactos) +

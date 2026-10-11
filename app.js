@@ -18,6 +18,7 @@
     lista: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>',
     reloj: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>',
+    descargar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10.5l5 5 5-5M4.5 20h15"/></svg>',
     alerta: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.2 5h2.4v7h-2.4zm1.2 8.6a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/></svg>'
   };
 
@@ -63,6 +64,35 @@
       '</header>';
   }
 
+  // Franja superior que distingue el registro inicial (una sola vez) del control periódico.
+  const ETAPA = {
+    bienvenida: 'registro', consentimiento: 'registro', 'sin-consentimiento': 'registro', basal: 'registro', 'registro-listo': 'registro',
+    preparacion: 'control', cuidador: 'control', pregunta: 'control', foto: 'control', revision: 'control', enviado: 'control'
+  };
+  const PASO_REGISTRO = { bienvenida: 1, consentimiento: 2, 'sin-consentimiento': 2, basal: 3 };
+
+  function cinta(nombre) {
+    const etapa = ETAPA[nombre];
+    if (etapa === 'registro') {
+      const paso = PASO_REGISTRO[nombre];
+      return '<p class="cinta registro"><strong>Registro inicial</strong><span>' +
+        (paso ? 'Paso ' + paso + ' de 3 · una sola vez' : 'Una sola vez') + '</span></p>';
+    }
+    if (etapa === 'control') return '<p class="cinta control"><strong>Control de hoy</strong><span>Preguntas y fotos</span></p>';
+    return '';
+  }
+
+  // --- Instalación en el teléfono ---
+  let avisoInstalar = null; // evento beforeinstallprompt, cuando el navegador lo ofrece
+  const instalada = function () {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  };
+
+  function botonInstalar() {
+    if (instalada()) return '';
+    return '<button class="btn secundario instalar" type="button" data-accion="instalar">' + ICONOS.descargar + ' Instalar Pie Vivo en el teléfono</button>';
+  }
+
   function progreso(etiqueta, actual, total) {
     let tramos = '';
     for (let i = 1; i <= total; i++) tramos += '<i class="' + (i <= actual ? 'hecho' : '') + '"></i>';
@@ -100,11 +130,12 @@
     return cabecera() + '<div class="cuerpo">' +
       '<h1 tabindex="-1">Te damos la bienvenida</h1>' +
       '<p class="bajada">Pie Vivo te acompaña a cuidar tus pies entre una consulta y la otra.</p>' +
+      '<p class="centro suave">Hoy, por única vez, te pedimos tu nombre, tu aceptación y unas preguntas sobre cómo están tus pies habitualmente.</p>' +
       '<form class="cuerpo" data-form="nombre" novalidate>' +
       '<label class="campo-etiqueta" for="nombre">¿Cómo te llamás?</label>' +
       '<input class="campo" id="nombre" name="nombre" type="text" autocomplete="given-name" autocapitalize="words" maxlength="40" value="' + escapar(estado.nombre || '') + '">' +
       '<p class="campo-error" id="nombre-error" role="alert" hidden>Escribí tu nombre para empezar.</p>' +
-      '<div class="acciones"><button class="btn" type="submit">Empezar</button></div>' +
+      '<div class="acciones"><button class="btn" type="submit">Empezar el registro</button>' + botonInstalar() + '</div>' +
       '</form></div>' + piePrototipo();
   };
 
@@ -135,7 +166,33 @@
     const respuestas = estado.basalBorrador || {};
     const intro = n === 1 ? '<p class="suave centro" style="margin-top:.75rem">' + escapar(C.basal.intro) + '</p>' : '';
     return pantallaPregunta(p, respuestas[p.id], 'responder-basal', n > 1 ? 'basal/' + (n - 1) : 'consentimiento',
-      progreso(C.basal.titulo + ':', n, total) + intro);
+      progreso(C.basal.titulo + ': pregunta', n, total) + intro);
+  };
+
+  vistas['registro-listo'] = function () {
+    return cabecera() + '<div class="cuerpo">' +
+      '<div class="exito registro">' + ICONOS.check + '</div>' +
+      '<h1 tabindex="-1">Registro completo</h1>' +
+      '<p class="bajada">Esto ya no te lo volvemos a preguntar.</p>' +
+      '<p class="centro">Desde ahora, cada vez que entres vas a hacer solo tu <strong>control</strong>: ' +
+      C.preguntas.length + ' preguntas y ' + C.fotos.length + ' fotos.</p>' +
+      '<div class="acciones"><a class="btn" href="#/inicio">Ir al inicio</a>' + botonInstalar() + '</div>' +
+      '</div>';
+  };
+
+  vistas.instalar = function () {
+    return cabecera() + '<div class="cuerpo">' +
+      '<h1 tabindex="-1">Instalar Pie Vivo</h1>' +
+      '<p class="bajada">Queda como una app más en tu teléfono.</p>' +
+      '<section class="tarjeta"><h2>En iPhone (Safari)</h2><ol class="lista">' +
+      '<li>Tocá el botón <strong>Compartir</strong> (el cuadrado con una flecha hacia arriba).</li>' +
+      '<li>Elegí <strong>Agregar a inicio</strong>.</li><li>Tocá <strong>Agregar</strong>.</li></ol></section>' +
+      '<section class="tarjeta"><h2>En Android (Chrome)</h2><ol class="lista">' +
+      '<li>Tocá el menú <strong>⋮</strong> arriba a la derecha.</li>' +
+      '<li>Elegí <strong>Instalar aplicación</strong> o <strong>Agregar a pantalla principal</strong>.</li>' +
+      '<li>Tocá <strong>Instalar</strong>.</li></ol></section>' +
+      '<div class="acciones"><button class="btn secundario" data-accion="atras">Volver</button></div>' +
+      '</div>';
   };
 
   // --- Flujo del control ---
@@ -151,7 +208,7 @@
       '<img class="ilustracion" src="img/isotipo.png" alt="">' +
       (hechoHoy ? '<p class="hecho-hoy">✓ Ya hiciste tu control de hoy</p>' : '') +
       '<div class="acciones">' + principal +
-      '<a class="btn secundario" href="#/ayuda">Necesito ayuda</a></div>' +
+      '<a class="btn secundario" href="#/ayuda">Necesito ayuda</a>' + botonInstalar() + '</div>' +
       (ultimo ? '<p class="ultimo">' + ICONOS.reloj + ' Último control: ' + D.fechaRelativa(ultimo.fecha) + '</p>' : '') +
       estadoEnvio() +
       '</div>' + piePrototipo();
@@ -430,7 +487,8 @@
       delete estado.basalBorrador;
       D.sembrarEjemplos(estado);
       guardar();
-      ir('inicio');
+      ir('registro-listo');
+      sincronizar();
     },
 
     comenzar: function (el) {
@@ -522,6 +580,12 @@
       sincronizar();
     },
 
+    instalar: function () {
+      if (!avisoInstalar) return ir('instalar');
+      avisoInstalar.prompt();
+      avisoInstalar.userChoice.then(function () { avisoInstalar = null; pintar(); });
+    },
+
     atras: function () { if (history.length > 1) history.back(); else ir('inicio'); },
 
     reiniciar: function () {
@@ -553,7 +617,7 @@
   });
 
   // --- Navegación ---
-  const SIN_REGISTRO = ['bienvenida', 'consentimiento', 'sin-consentimiento', 'ayuda', 'prototipo'];
+  const SIN_REGISTRO = ['bienvenida', 'consentimiento', 'sin-consentimiento', 'ayuda', 'prototipo', 'instalar'];
   let fotoVisible = null;
 
   function pintar() {
@@ -561,7 +625,7 @@
     const partes = partesRuta();
     const nombre = vistas[partes[0]] ? partes[0] : 'inicio';
 
-    if (!estado.nombre && nombre !== 'bienvenida' && nombre !== 'prototipo') return ir('bienvenida');
+    if (!estado.nombre && ['bienvenida', 'prototipo', 'instalar'].indexOf(nombre) < 0) return ir('bienvenida');
     if (!estado.consentimiento && SIN_REGISTRO.indexOf(nombre) < 0) return ir('bienvenida');
     if (estado.consentimiento && !estado.basal && nombre !== 'basal' && SIN_REGISTRO.indexOf(nombre) < 0) return ir('basal/1');
     if (['pregunta', 'foto', 'revision'].indexOf(nombre) >= 0 && !estado.borrador) return ir('inicio');
@@ -573,7 +637,8 @@
 
     if (nombre === 'revision') estado.borrador.corrigiendo = false;
 
-    app.innerHTML = vistas[nombre](partes[1]);
+    app.dataset.etapa = ETAPA[nombre] || '';
+    app.innerHTML = cinta(nombre) + vistas[nombre](partes[1]);
     window.scrollTo(0, 0);
     const titulo = app.querySelector('h1');
     if (titulo) titulo.focus({ preventScroll: true });
@@ -593,6 +658,8 @@
   }
 
   window.addEventListener('online', sincronizar);
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); avisoInstalar = e; });
+  window.addEventListener('appinstalled', function () { avisoInstalar = null; pintar(); });
 
   pintar();
   sincronizar();
