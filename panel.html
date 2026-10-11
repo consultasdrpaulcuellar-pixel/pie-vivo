@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pie Vivo · Panel profesional</title>
+  <meta name="theme-color" content="#04773B">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="img/favicon.png">
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <header class="barra-superior">
+    <img src="img/logo.png" alt="Pie Vivo by Dr. Paul Cuéllar">
+    <div>
+      <strong>Panel profesional</strong>
+      <span>Prototipo · datos de este dispositivo</span>
+    </div>
+    <a class="enlace-app" href="index.html">← App del paciente</a>
+  </header>
+  <nav class="pestanas" aria-label="Secciones">
+    <a href="#avisos" data-pestana="avisos">Avisos</a>
+    <a href="#paciente" data-pestana="paciente">Paciente</a>
+    <a href="#contenido" data-pestana="contenido">Contenido clínico</a>
+  </nav>
+  <main id="panel"></main>
+  <script src="contenido.js"></script>
+  <script src="datos.js"></script>
+  <script src="panel.js"></script>
+</body>
+</html>
