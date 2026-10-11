@@ -100,3 +100,10 @@ textarea { min-height: 4.5rem; resize: vertical; }
   body { background: #fff; }
   .tarjeta { break-inside: avoid; }
 }
+
+/* Ingreso profesional */
+.acceso { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; padding: 0.6rem 1rem; background: var(--turquesa-suave); border-bottom: 1px solid var(--linea); font-size: 0.95rem; }
+.acceso input { width: 16rem; max-width: 100%; min-height: 2.75rem; padding: 0.4rem 0.65rem; border: 1px solid #8A979E; border-radius: 0.5rem; font: inherit; }
+.acceso .btn { min-height: 2.5rem; }
+.acceso-botones { display: flex; gap: 0.5rem; margin-left: auto; }
+.mensaje-acceso { font-weight: 600; }

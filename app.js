@@ -3,6 +3,7 @@
   'use strict';
   const C = window.PV_CONTENIDO;
   const D = window.PV_DATOS;
+  const N = window.PV_NUBE;
   const app = document.getElementById('app');
 
   let estado = D.leer();
@@ -34,6 +35,25 @@
   }
 
   function guardar() { D.guardar(estado); }
+
+  // --- Envío al equipo ---
+  function textoEnvio() {
+    if (!estado.controles.some(function (c) { return !c.ejemplo; })) return '';
+    return N.pendientes(estado).length
+      ? 'Guardado en este teléfono. Se envía al equipo cuando haya conexión.'
+      : '✓ Enviado al equipo de salud.';
+  }
+
+  function estadoEnvio() {
+    return '<p class="estado-envio" id="estado-envio" aria-live="polite">' + escapar(textoEnvio()) + '</p>';
+  }
+
+  function sincronizar() {
+    N.sincronizar(estado, guardar).then(function () {
+      const el = document.getElementById('estado-envio');
+      if (el) el.textContent = textoEnvio();
+    });
+  }
 
   // --- Piezas comunes ---
   function cabecera(volver) {
@@ -133,6 +153,7 @@
       '<div class="acciones">' + principal +
       '<a class="btn secundario" href="#/ayuda">Necesito ayuda</a></div>' +
       (ultimo ? '<p class="ultimo">' + ICONOS.reloj + ' Último control: ' + D.fechaRelativa(ultimo.fecha) + '</p>' : '') +
+      estadoEnvio() +
       '</div>' + piePrototipo();
   };
 
@@ -217,6 +238,7 @@
       '<div class="exito">' + ICONOS.check + '</div>' +
       '<h1 tabindex="-1">' + escapar(C.confirmacion.titulo) + '</h1>' +
       '<p class="bajada">' + escapar(C.confirmacion.texto) + '</p>' +
+      estadoEnvio() +
       advertencia(escapar(C.confirmacion.advertencia)) +
       '<div class="acciones">' +
       '<a class="btn" href="#/inicio">Volver al inicio</a>' +
@@ -252,7 +274,7 @@
     }
     return cabecera('inicio') + '<div class="cuerpo">' +
       '<h1 tabindex="-1">Opciones del prototipo</h1>' +
-      '<p class="centro suave">Contenido ' + escapar(C.version) + '. Todo queda guardado solo en este dispositivo.</p>' +
+      '<p class="centro suave">Contenido ' + escapar(C.version) + '. Los controles se guardan en este dispositivo y se envían al panel del equipo. Usar solo datos de prueba.</p>' +
       '<div class="acciones" style="margin-top:0">' +
       '<a class="btn" href="panel.html">Ver panel profesional</a>' +
       '<a class="btn secundario" href="panel.html#contenido">Ver contenido clínico</a>' +
@@ -414,7 +436,7 @@
     comenzar: function (el) {
       const cuidador = el.dataset.cuidador;
       estado.borrador = {
-        id: 'c-' + Date.now(),
+        id: window.crypto && crypto.randomUUID ? crypto.randomUUID() : 'c-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
         respuestas: {},
         fotos: {},
         realizadoPor: cuidador ? { tipo: 'cuidador', nombre: cuidador } : { tipo: 'paciente', nombre: estado.nombre },
@@ -497,12 +519,13 @@
       estado.borrador = null;
       guardar();
       ir('enviado');
+      sincronizar();
     },
 
     atras: function () { if (history.length > 1) history.back(); else ir('inicio'); },
 
     reiniciar: function () {
-      D.reiniciar().then(function () { estado = D.leer(); ir('bienvenida'); });
+      N.olvidarPaciente().then(D.reiniciar).then(function () { estado = D.leer(); ir('bienvenida'); });
     }
   };
 
@@ -569,5 +592,8 @@
     navigator.serviceWorker.register('sw.js').catch(function () {});
   }
 
+  window.addEventListener('online', sincronizar);
+
   pintar();
+  sincronizar();
 })();

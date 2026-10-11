@@ -164,3 +164,5 @@ p { margin: 0 0 0.75rem; }
 .campo { width: 100%; min-height: 4rem; padding: 0.5rem 1rem; border: 2px solid var(--gris); border-radius: 0.9rem; background: var(--blanco); color: var(--tinta); font: inherit; font-size: 1.5rem; text-align: center; }
 .campo:focus { outline: 3px solid var(--verde); outline-offset: 2px; }
 .campo-error { margin: 0.6rem 0 0; color: #A32417; font-weight: 600; text-align: center; }
+.estado-envio { margin: 0.75rem 0 0; color: var(--gris); font-size: 1rem; text-align: center; }
+.estado-envio:empty { display: none; }

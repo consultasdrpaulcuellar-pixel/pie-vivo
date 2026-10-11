@@ -1,6 +1,6 @@
 /*
-  Datos del prototipo. Todo queda en este dispositivo (localStorage + IndexedDB);
-  nada se envía a un servidor. En el PMV este archivo se reemplaza por Supabase.
+  Datos locales del prototipo (localStorage + IndexedDB). La App siempre guarda primero acá;
+  nube.js se encarga de subirlos a Supabase cuando hay conexión.
 */
 (function () {
   'use strict';

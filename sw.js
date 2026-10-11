@@ -1,9 +1,9 @@
 // Red primero, caché como respaldo: mientras iteramos el prototipo siempre se ve la última versión,
 // y si no hay conexión la App abre igual con lo último que se descargó.
-const CACHE = 'pievivo-proto-v1';
+const CACHE = 'pievivo-proto-v2';
 const BASE = [
   './', 'index.html', 'panel.html', 'estilos.css', 'panel.css',
-  'contenido.js', 'datos.js', 'app.js', 'panel.js', 'manifest.webmanifest',
+  'contenido.js', 'datos.js', 'config.js', 'nube.js', 'app.js', 'panel.js', 'manifest.webmanifest',
   'img/logo.png', 'img/isotipo.png', 'img/icon-192.png', 'img/icon-512.png'
 ];
 
